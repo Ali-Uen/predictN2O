@@ -4,7 +4,6 @@ This module expands the training set by adding noisy copies of feature vectors.
 Useful for regularization and improving model robustness.
 """
 
-
 import numpy as np
 import logging
 logger = logging.getLogger(__name__)

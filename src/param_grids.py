@@ -115,22 +115,5 @@ param_grids = {
             "learning_rate": [0.001],
             "patience": [20]
         }
-    },
- "Prophet": {
-        "Januar–März": {
-            "seasonality_mode": ["additive"],
-            "changepoint_prior_scale": [0.05],
-            "seasonality_prior_scale": [10.0]
-        },
-        "März–Mitte Mai": {
-            "seasonality_mode": ["additive"],
-            "changepoint_prior_scale": [0.05],
-            "seasonality_prior_scale": [10.0]
-        },
-        "Mai–Oktober": {
-            "seasonality_mode": ["additive"],
-            "changepoint_prior_scale": [0.05],
-            "seasonality_prior_scale": [10.0]
-        }
     }
 }
