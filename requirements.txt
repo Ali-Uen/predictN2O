@@ -1,0 +1,28 @@
+# --- Core ML & Data Analysis ---
+numpy==2.1.3
+pandas==2.3.0
+scikit-learn==1.7.0
+xgboost==3.0.2
+tensorflow==2.19.0
+shap==0.48.0
+joblib==1.5.1
+
+# --- Forecasting ---
+prophet==1.1.7
+
+# --- Plotting & Visualization ---
+matplotlib==3.10.3
+seaborn==0.13.2
+plotly==6.2.0
+
+# --- Utilities ---
+tqdm==4.67.1
+openpyxl==3.1.5
+
+# --- Notebooks (optional) ---
+jupyter==1.1.1
+notebook==7.4.3
+ipywidgets==8.1.7
+
+# --- Testing (optional) ---
+pytest==8.4.1
