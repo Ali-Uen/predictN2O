@@ -1,0 +1,205 @@
+general:
+  project_name: ML_Pipeline_20251001
+  random_seed: 42
+  verbose: true
+  save_results: true
+  save_figures: true
+data:
+  data_path: data/AltenrheinWWTP.csv
+  time_column: TIME
+  target_column: N2O
+  feature_columns: &id003 []
+  exclude_cols:
+  - TIME
+periods:
+- name: 2016_Q1
+  start_date: 01-01
+  end_date: 03-31
+  description: Q1 2016 (01-01 to 03-31)
+- name: 2016_Q2
+  start_date: 04-01
+  end_date: 06-30
+  description: Q2 2016 (04-01 to 06-30)
+- name: 2016_Q3
+  start_date: 07-01
+  end_date: 09-30
+  description: Q3 2016 (07-01 to 09-30)
+- name: 2016_Q4
+  start_date: 10-01
+  end_date: 12-31
+  description: Q4 2016 (10-01 to 12-31)
+models:
+  available_models:
+  - KNN
+  - RandomForest
+  - XGBoost
+  - AdaBoost
+  - DecisionTree
+  - DNN
+  default_model: RandomForest
+  cv_folds: 5
+  cv_scoring: r2
+  cv_n_jobs: -1
+  cv_verbose: 2
+feature_engineering:
+  time_features:
+    enabled: true
+    cyclic_hour: true
+    cyclic_day_of_year: true
+  lag_features:
+    enabled: true
+    auto_lags:
+      suggested_lags: &id001
+      - 1
+      - 4
+      - 16
+      - 64
+    default_lags:
+      AUTO_FEATURES: *id001
+  rolling_features:
+    enabled: true
+    auto_windows:
+      suggested_windows: &id002
+      - 4
+      - 24
+      - 96
+      - 672
+    default_windows:
+      AUTO_FEATURES: *id002
+    statistics:
+    - mean
+    - std
+augmentation:
+  enabled: false
+  n_augment: 0
+  noise_level: 0.0
+resampling:
+  default_rule: null
+  model_overrides: {}
+output:
+  results_dir: results
+  model_output_dir: results/model_outputs
+  figures_dir: results/figures
+  logs_dir: results/logs
+  predictions_dir: results/predictions
+  model_format: joblib
+  results_format: csv
+logging:
+  level: INFO
+  format: '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+  file_logging: true
+  console_logging: true
+  log_file: results/logs/pipeline.log
+hyperparameters:
+  RandomForest:
+    n_estimators:
+    - 100
+    - 500
+    max_depth:
+    - 10
+    - 20
+    - null
+    min_samples_split:
+    - 2
+    - 10
+  XGBoost:
+    n_estimators:
+    - 100
+    - 500
+    learning_rate:
+    - 0.01
+    - 0.1
+    max_depth:
+    - 3
+    - 6
+  KNN:
+    n_neighbors:
+    - 3
+    - 5
+    - 10
+plugins:
+  feature_engineering:
+    enabled_plugins:
+    - time_features
+    - lag_features
+    - rolling_features
+    plugin_search_paths:
+    - src/plugins/feature_engineering
+dataset_analysis:
+  analysis_date: '2025-10-01T02:26:46.695034'
+  original_shape: !!python/tuple
+  - 10000
+  - 5
+  detected_columns:
+    column_details:
+      TIME:
+        dtype: object
+        null_count: 0
+        null_percentage: 0.0
+        unique_count: 10000
+        is_datetime: true
+      N2O:
+        dtype: float64
+        null_count: 43
+        null_percentage: 0.43
+        unique_count: 9948
+        mean: 0.09343375117254193
+        std: 0.10754412417953829
+        min: -0.001263557
+        max: 0.734581776
+        is_datetime: true
+      DO:
+        dtype: float64
+        null_count: 43
+        null_percentage: 0.43
+        unique_count: 934
+        mean: 2.1882184942868332
+        std: 0.43487212368158445
+        min: 0.0
+        max: 6.113333333
+        is_datetime: true
+      Q_in:
+        dtype: float64
+        null_count: 43
+        null_percentage: 0.43
+        unique_count: 2417
+        mean: 29.212899037300595
+        std: 19.00841473341096
+        min: 2.0
+        max: 97.125
+        is_datetime: true
+      T:
+        dtype: float64
+        null_count: 43
+        null_percentage: 0.43
+        unique_count: 1626
+        mean: 11.45983761126052
+        std: 1.3353043647899132
+        min: 7.8
+        max: 14.8
+        is_datetime: true
+    numeric_columns:
+    - N2O
+    - DO
+    - Q_in
+    - T
+    categorical_columns:
+    - TIME
+    datetime_columns:
+    - TIME
+    - N2O
+    - DO
+    - Q_in
+    - T
+    recommended_features: *id003
+  time_analysis:
+    recommended_time_column: TIME
+    resolution: 15T
+    date_range:
+      start: '2016-01-01 00:00:00'
+      end: '2016-04-14 03:45:00'
+      duration_days: 104
+    seasonal_info:
+      has_daily_pattern: true
+      has_weekly_pattern: false
+      has_yearly_pattern: false

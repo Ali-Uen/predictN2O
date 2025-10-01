@@ -1,0 +1,132 @@
+# Dataset-Agnostic N2O Emission Prediction Configuration
+# Auto-generated for any emission prediction dataset
+# Features and parameters are automatically detected and applied
+
+general:
+  project_name: "Generic_Emission_Prediction_Test"
+  random_seed: 42
+  verbose: true
+  save_results: true
+  save_figures: true
+
+data:
+  data_path: data/AltenrheinWWTP.csv
+  time_column: TIME
+  target_column: N2O
+  feature_columns: AUTO_FEATURES  # Automatically detect all numeric features
+  exclude_cols:
+    - TIME  # Exclude time column from features
+  include_cols: null
+  default_split_ratio: 0.8
+  min_samples_period: 50
+  min_test_samples: 10
+
+# Analysis periods - automatically determined based on data
+periods:
+  - name: "2016_Q1"
+    start_date: "01-01"
+    end_date: "03-31"
+    description: "Q1 2016 (01-01 to 03-31)"
+
+models:
+  available_models:
+    - KNN
+    - RandomForest
+    - XGBoost
+    - AdaBoost
+    - DecisionTree
+    - DNN
+  default_model: KNN
+  cv_folds: 3
+  cv_scoring: r2
+  cv_n_jobs: -1
+  cv_verbose: 2
+
+feature_engineering:
+  time_features:
+    enabled: true
+    cyclic_hour: true
+    cyclic_day_of_year: true
+    
+  lag_features:
+    enabled: true
+    # AUTO_FEATURES applies suggested lags to all detected numeric features
+    auto_lags:
+      suggested_lags: [1, 4, 16, 64]  # 15min, 1h, 4h, 16h intervals
+    default_lags:
+      AUTO_FEATURES: [1, 4, 16, 64]
+      
+  rolling_features:
+    enabled: true
+    # AUTO_FEATURES applies suggested windows to all detected numeric features
+    auto_windows:
+      suggested_windows: [4, 24, 96, 672]  # 1h, 6h, 24h, 1week windows
+    default_windows:
+      AUTO_FEATURES: [4, 24, 96, 672]
+    statistics:
+      - mean
+      - std
+
+augmentation:
+  enabled: true
+  n_augment: 3
+  noise_level: 0.05
+
+resampling:
+  default_rule: null
+  model_overrides: {}
+
+output:
+  results_dir: results
+  model_output_dir: results/model_outputs
+  figures_dir: results/figures
+  logs_dir: results/logs
+  predictions_dir: results/predictions
+  model_format: joblib
+  results_format: csv
+
+logging:
+  level: INFO
+  format: '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+  file_logging: true
+  console_logging: true
+  log_file: results/logs/pipeline.log
+
+# Comprehensive hyperparameter grids for all models
+hyperparameters:
+  KNN:
+    n_neighbors: [3, 5, 7]
+    weights: ['uniform', 'distance']
+  
+  RandomForest:
+    n_estimators: [100, 300]
+    max_depth: [10, 20, null]
+    min_samples_split: [2, 5]
+  
+  XGBoost:
+    n_estimators: [100, 300]
+    learning_rate: [0.01, 0.1]
+    max_depth: [3, 6]
+  
+  AdaBoost:
+    n_estimators: [50, 100]
+    learning_rate: [0.1, 1.0]
+  
+  DecisionTree:
+    max_depth: [10, 20, null]
+    min_samples_split: [2, 5]
+  
+  DNN:
+    hidden_layers: [[64, 32], [128, 64, 32]]
+    learning_rate: [0.001, 0.01]
+    dropout_rate: [0.2, 0.3]
+    batch_size: [32, 64]
+
+plugins:
+  feature_engineering:
+    enabled_plugins: 
+      - time_features
+      - lag_features
+      - rolling_features
+    plugin_search_paths:
+      - src/plugins/feature_engineering
