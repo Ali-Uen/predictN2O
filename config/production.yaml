@@ -1,0 +1,626 @@
+general:
+  project_name: N2O_Production
+  random_seed: 42
+  verbose: false
+  save_results: true
+  save_figures: true
+data:
+  data_path: data\AltenrheinWWTP.csv
+  time_column: TIME
+  target_column: N2O
+  feature_columns:
+  - DO
+  - T
+  - Q_in
+  exclude_cols:
+  - TIME
+  include_cols: null
+  default_split_ratio: 0.8
+  min_samples_period: 50
+  min_test_samples: 10
+periods:
+- name: "Januar\u2013M\xE4rz"
+  start_date: 01-01
+  end_date: 03-31
+  description: Period from 01-01 to 03-31
+- name: "M\xE4rz\u2013Mitte Mai"
+  start_date: 03-01
+  end_date: 05-15
+  description: Period from 03-01 to 05-15
+- name: "Mai\u2013Oktober"
+  start_date: 05-15
+  end_date: 10-31
+  description: Period from 05-15 to 10-31
+models:
+  available_models:
+  - KNN
+  - RandomForest
+  - XGBoost
+  - AdaBoost
+  - DecisionTree
+  - DNN
+  default_model: KNN
+  cv_folds: 3
+  cv_scoring: r2
+  cv_n_jobs: -1
+  cv_verbose: 2
+feature_engineering:
+  time_features:
+    enabled: true
+    cyclic_hour: true
+    cyclic_day_of_year: true
+  lag_features:
+    enabled: true
+    default_lags:
+      DO:
+      - 1
+      - 2
+      Q_in:
+      - 1
+      - 2
+      T:
+      - 1
+      - 2
+  rolling_features:
+    enabled: true
+    default_windows:
+      DO:
+      - 3
+      - 6
+      - 12
+      - 24
+      Q_in:
+      - 3
+      - 6
+      - 12
+      - 24
+      T:
+      - 3
+      - 6
+      - 12
+      - 24
+    statistics:
+    - mean
+    - std
+augmentation:
+  enabled: true
+  n_augment: 3
+  noise_level: 0.05
+resampling:
+  default_rule: null
+  model_overrides:
+    KNN:
+      "M\xE4rz\u2013Mitte Mai": 30T
+output:
+  results_dir: results
+  model_output_dir: results/model_outputs
+  figures_dir: results/figures
+  logs_dir: results/logs
+  predictions_dir: results/predictions
+  model_format: joblib
+  results_format: csv
+logging:
+  level: WARNING
+  format: '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+  file_logging: true
+  console_logging: true
+  log_file: results/logs/pipeline.log
+hyperparameters:
+  XGBoost:
+    n_estimators:
+    - 1200
+    learning_rate:
+    - 0.003
+    max_depth:
+    - 6
+    min_child_weight:
+    - 3
+    subsample:
+    - 0.8
+    colsample_bytree:
+    - 0.8
+  RandomForest:
+    n_estimators:
+    - 1000
+    max_depth:
+    - 20
+    min_samples_split:
+    - 10
+    min_samples_leaf:
+    - 2
+  KNN:
+    n_neighbors:
+    - 10
+  DecisionTree:
+    max_depth:
+    - 30
+    min_samples_split:
+    - 7
+    min_samples_leaf:
+    - 2
+  AdaBoost:
+    n_estimators:
+    - 800
+    learning_rate:
+    - 1.0
+  DNN:
+    epochs:
+    - 200
+    batch_size:
+    - 128
+    learning_rate:
+    - 0.001
+    patience:
+    - 20
+plugins:
+  feature_engineering:
+    enabled_plugins:
+    - time_features
+    - lag_features
+    - rolling_features
+    plugin_search_paths:
+    - src/plugins/feature_engineering
+model_period_lags:
+  KNN:
+    "Januar\u2013M\xE4rz":
+      DO:
+      - 1
+      - 2
+      Q_in:
+      - 1
+      - 2
+      T:
+      - 1
+      - 2
+    "M\xE4rz\u2013Mitte Mai":
+      DO:
+      - 1
+      - 2
+      Q_in:
+      - 1
+      - 2
+      T:
+      - 1
+      - 2
+    "Mai\u2013Oktober":
+      DO: []
+      Q_in: []
+      T: []
+  RandomForest:
+    "Januar\u2013M\xE4rz":
+      DO:
+      - 1
+      - 2
+      Q_in:
+      - 1
+      - 2
+      T:
+      - 1
+      - 2
+    "M\xE4rz\u2013Mitte Mai":
+      DO:
+      - 1
+      - 2
+      Q_in:
+      - 1
+      - 2
+      T:
+      - 1
+      - 2
+    "Mai\u2013Oktober":
+      DO:
+      - 1
+      - 2
+      Q_in:
+      - 1
+      - 2
+      T:
+      - 1
+      - 2
+  XGBoost:
+    "Januar\u2013M\xE4rz":
+      DO:
+      - 1
+      - 2
+      Q_in:
+      - 1
+      - 2
+      T:
+      - 1
+      - 2
+    "M\xE4rz\u2013Mitte Mai":
+      DO:
+      - 1
+      - 2
+      Q_in:
+      - 1
+      - 2
+      T:
+      - 1
+      - 2
+    "Mai\u2013Oktober":
+      DO:
+      - 1
+      - 2
+      Q_in:
+      - 1
+      - 2
+      T:
+      - 1
+      - 2
+  AdaBoost:
+    "Januar\u2013M\xE4rz":
+      DO:
+      - 1
+      - 2
+      Q_in:
+      - 1
+      - 2
+      T:
+      - 1
+      - 2
+    "M\xE4rz\u2013Mitte Mai":
+      DO:
+      - 1
+      - 2
+      Q_in:
+      - 1
+      - 2
+      T:
+      - 1
+      - 2
+    "Mai\u2013Oktober":
+      DO:
+      - 1
+      - 2
+      Q_in:
+      - 1
+      - 2
+      T:
+      - 1
+      - 2
+  DecisionTree:
+    "Januar\u2013M\xE4rz":
+      DO:
+      - 1
+      - 2
+      Q_in:
+      - 1
+      - 2
+      T:
+      - 1
+      - 2
+    "M\xE4rz\u2013Mitte Mai":
+      DO:
+      - 1
+      - 2
+      Q_in:
+      - 1
+      - 2
+      T:
+      - 1
+      - 2
+    "Mai\u2013Oktober":
+      DO:
+      - 1
+      - 2
+      Q_in:
+      - 1
+      - 2
+      T:
+      - 1
+      - 2
+  DNN:
+    "Januar\u2013M\xE4rz":
+      DO:
+      - 1
+      - 2
+      Q_in:
+      - 1
+      - 2
+      T:
+      - 1
+      - 2
+    "M\xE4rz\u2013Mitte Mai":
+      DO:
+      - 1
+      - 2
+      Q_in:
+      - 1
+      - 2
+      T:
+      - 1
+      - 2
+    "Mai\u2013Oktober":
+      DO:
+      - 1
+      - 2
+      Q_in:
+      - 1
+      - 2
+      T:
+      - 1
+      - 2
+model_period_rolling:
+  KNN:
+    "Januar\u2013M\xE4rz":
+      DO:
+      - 3
+      - 6
+      - 12
+      - 24
+      Q_in:
+      - 3
+      - 6
+      - 12
+      - 24
+      T:
+      - 3
+      - 6
+      - 12
+      - 24
+    "M\xE4rz\u2013Mitte Mai":
+      DO:
+      - 3
+      - 6
+      - 12
+      - 24
+      Q_in:
+      - 3
+      - 6
+      - 12
+      - 24
+      T:
+      - 3
+      - 6
+      - 12
+      - 24
+    "Mai\u2013Oktober":
+      DO: []
+      Q_in: []
+      T: []
+  RandomForest:
+    "Januar\u2013M\xE4rz":
+      DO:
+      - 3
+      - 6
+      - 12
+      - 24
+      Q_in:
+      - 3
+      - 6
+      - 12
+      - 24
+      T:
+      - 3
+      - 6
+      - 12
+      - 24
+    "M\xE4rz\u2013Mitte Mai":
+      DO:
+      - 3
+      - 6
+      - 12
+      - 24
+      Q_in:
+      - 3
+      - 6
+      - 12
+      - 24
+      T:
+      - 3
+      - 6
+      - 12
+      - 24
+    "Mai\u2013Oktober":
+      DO:
+      - 3
+      - 6
+      - 12
+      - 24
+      Q_in:
+      - 3
+      - 6
+      - 12
+      - 24
+      T:
+      - 3
+      - 6
+      - 12
+      - 24
+  XGBoost:
+    "Januar\u2013M\xE4rz":
+      DO:
+      - 3
+      - 6
+      - 12
+      - 24
+      Q_in:
+      - 3
+      - 6
+      - 12
+      - 24
+      T:
+      - 3
+      - 6
+      - 12
+      - 24
+    "M\xE4rz\u2013Mitte Mai":
+      DO:
+      - 3
+      - 6
+      - 12
+      - 24
+      Q_in:
+      - 3
+      - 6
+      - 12
+      - 24
+      T:
+      - 3
+      - 6
+      - 12
+      - 24
+    "Mai\u2013Oktober":
+      DO:
+      - 3
+      - 6
+      - 12
+      - 24
+      Q_in:
+      - 3
+      - 6
+      - 12
+      - 24
+      T:
+      - 3
+      - 6
+      - 12
+      - 24
+  AdaBoost:
+    "Januar\u2013M\xE4rz":
+      DO:
+      - 3
+      - 6
+      - 12
+      - 24
+      Q_in:
+      - 3
+      - 6
+      - 12
+      - 24
+      T:
+      - 3
+      - 6
+      - 12
+      - 24
+    "M\xE4rz\u2013Mitte Mai":
+      DO:
+      - 3
+      - 6
+      - 12
+      - 24
+      Q_in:
+      - 3
+      - 6
+      - 12
+      - 24
+      T:
+      - 3
+      - 6
+      - 12
+      - 24
+    "Mai\u2013Oktober":
+      DO:
+      - 3
+      - 6
+      - 12
+      - 24
+      Q_in:
+      - 3
+      - 6
+      - 12
+      - 24
+      T:
+      - 3
+      - 6
+      - 12
+      - 24
+  DecisionTree:
+    "Januar\u2013M\xE4rz":
+      DO:
+      - 3
+      - 6
+      - 12
+      - 24
+      Q_in:
+      - 3
+      - 6
+      - 12
+      - 24
+      T:
+      - 3
+      - 6
+      - 12
+      - 24
+    "M\xE4rz\u2013Mitte Mai":
+      DO:
+      - 3
+      - 6
+      - 12
+      - 24
+      Q_in:
+      - 3
+      - 6
+      - 12
+      - 24
+      T:
+      - 3
+      - 6
+      - 12
+      - 24
+    "Mai\u2013Oktober":
+      DO:
+      - 3
+      - 6
+      - 12
+      - 24
+      Q_in:
+      - 3
+      - 6
+      - 12
+      - 24
+      T:
+      - 3
+      - 6
+      - 12
+      - 24
+  DNN:
+    "Januar\u2013M\xE4rz":
+      DO:
+      - 3
+      - 6
+      - 12
+      - 24
+      Q_in:
+      - 3
+      - 6
+      - 12
+      - 24
+      T:
+      - 3
+      - 6
+      - 12
+      - 24
+    "M\xE4rz\u2013Mitte Mai":
+      DO:
+      - 3
+      - 6
+      - 12
+      - 24
+      Q_in:
+      - 3
+      - 6
+      - 12
+      - 24
+      T:
+      - 3
+      - 6
+      - 12
+      - 24
+    "Mai\u2013Oktober":
+      DO:
+      - 3
+      - 6
+      - 12
+      - 24
+      Q_in:
+      - 3
+      - 6
+      - 12
+      - 24
+      T:
+      - 3
+      - 6
+      - 12
+      - 24

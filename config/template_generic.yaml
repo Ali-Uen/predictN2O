@@ -1,0 +1,131 @@
+# Generic ML Pipeline Configuration Template
+# This template works with any emission prediction dataset
+# Use the dataset analyzer to automatically generate dataset-specific configurations
+
+general:
+  project_name: "Generic_Emission_Prediction"
+  random_seed: 42
+  verbose: true
+  save_results: true
+  save_figures: true
+
+data:
+  # REQUIRED: Specify these parameters for your dataset
+  data_path: null  # Path to your CSV file
+  time_column: null  # Name of the datetime column
+  target_column: null  # Name of the emission/target column
+  
+  # OPTIONAL: Auto-detection if not specified
+  feature_columns: AUTO_FEATURES  # Use AUTO_FEATURES for automatic detection
+  exclude_cols: []  # Columns to exclude from features
+  include_cols: null  # Specific columns to include (overrides exclude_cols)
+  
+  # Data splitting
+  default_split_ratio: 0.8
+  min_samples_period: 50
+  min_test_samples: 10
+
+# Periods will be auto-generated based on data date range
+periods: []
+
+models:
+  available_models:
+    - KNN
+    - RandomForest
+    - XGBoost
+    - AdaBoost
+    - DecisionTree
+    - DNN
+  default_model: RandomForest
+  cv_folds: 5
+  cv_scoring: r2
+  cv_n_jobs: -1
+  cv_verbose: 2
+
+feature_engineering:
+  time_features:
+    enabled: true
+    cyclic_hour: true
+    cyclic_day_of_year: true
+    
+  lag_features:
+    enabled: true
+    # AUTO_FEATURES will apply suggested lags to all numeric features
+    default_lags:
+      AUTO_FEATURES: [1, 4, 12, 24]  # Automatic lag periods based on data frequency
+      
+  rolling_features:
+    enabled: true
+    # AUTO_FEATURES will apply suggested windows to all numeric features
+    default_windows:
+      AUTO_FEATURES: [4, 12, 24, 96]  # Automatic window sizes based on data frequency
+    statistics:
+      - mean
+      - std
+
+augmentation:
+  enabled: true
+  n_augment: 3
+  noise_level: 0.05
+
+resampling:
+  default_rule: null
+  model_overrides: {}
+
+output:
+  results_dir: results
+  model_output_dir: results/model_outputs
+  figures_dir: results/figures
+  logs_dir: results/logs
+  predictions_dir: results/predictions
+  model_format: joblib
+  results_format: csv
+
+logging:
+  level: INFO
+  format: '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+  file_logging: true
+  console_logging: true
+  log_file: results/logs/pipeline.log
+
+# Generic hyperparameter grids - work well for most emission prediction tasks
+hyperparameters:
+  RandomForest:
+    n_estimators: [100, 300, 500]
+    max_depth: [10, 20, null]
+    min_samples_split: [2, 5, 10]
+    min_samples_leaf: [1, 2, 4]
+  
+  XGBoost:
+    n_estimators: [100, 300, 500]
+    learning_rate: [0.01, 0.1, 0.2]
+    max_depth: [3, 6, 9]
+    min_child_weight: [1, 3, 5]
+  
+  KNN:
+    n_neighbors: [3, 5, 7, 10, 15]
+    weights: ['uniform', 'distance']
+    metric: ['euclidean', 'manhattan']
+  
+  AdaBoost:
+    n_estimators: [50, 100, 200]
+    learning_rate: [0.01, 0.1, 1.0]
+  
+  DecisionTree:
+    max_depth: [10, 20, 30, null]
+    min_samples_split: [2, 5, 10]
+    min_samples_leaf: [1, 2, 4]
+  
+  DNN:
+    hidden_layers: [[64, 32], [128, 64, 32], [256, 128, 64]]
+    learning_rate: [0.001, 0.01, 0.1]
+    dropout_rate: [0.2, 0.3, 0.5]
+    batch_size: [32, 64, 128]
+
+plugins:
+  feature_engineering:
+    - time_features
+    - lag_features
+    - rolling_features
+  plugin_search_paths:
+    - src/plugins/feature_engineering

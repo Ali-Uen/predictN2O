@@ -15,27 +15,42 @@ from sklearn.ensemble import (
 )
 from sklearn.neighbors import KNeighborsRegressor
 from sklearn.tree import DecisionTreeRegressor
-from xgboost import XGBRegressor
 from sklearn.model_selection import GridSearchCV
 
-from tensorflow.keras.models import Sequential
-from tensorflow.keras.layers import Dense
-from tensorflow.keras.optimizers import Adam
-from tensorflow.keras.callbacks import EarlyStopping
+# Optional imports
+try:
+    from xgboost import XGBRegressor
+    XGBOOST_AVAILABLE = True
+except ImportError:
+    XGBRegressor = None
+    XGBOOST_AVAILABLE = False
 
-from src.config import MODEL_OUTPUT_DIR
+try:
+    from tensorflow.keras.models import Sequential
+    from tensorflow.keras.layers import Dense
+    from tensorflow.keras.optimizers import Adam
+    from tensorflow.keras.callbacks import EarlyStopping
+    TENSORFLOW_AVAILABLE = True
+except ImportError:
+    Sequential = Dense = Adam = EarlyStopping = None
+    TENSORFLOW_AVAILABLE = False
 
 logger = logging.getLogger(__name__)
 
 # Supported model instances (except DNN, which is built separately)
 estimator_dict = {
-    "XGBoost": XGBRegressor(random_state=42, verbosity=0),
     "RandomForest": RandomForestRegressor(random_state=42),
     "KNN": KNeighborsRegressor(),
     "DecisionTree": DecisionTreeRegressor(random_state=42),
     "AdaBoost": AdaBoostRegressor(random_state=42),
     "DNN": None,
 }
+
+# Add XGBoost if available
+if XGBOOST_AVAILABLE:
+    estimator_dict["XGBoost"] = XGBRegressor(random_state=42, verbosity=0)
+
+
 
 def train_model(X, 
                 y,
@@ -79,7 +94,7 @@ def train_model(X,
             logger.info("Model '%s' trained without hyperparameter search.", model_name)
             return estimator, None
         
-def save_model(model, model_name: str, period_name: str, output_dir: str = MODEL_OUTPUT_DIR) -> None:
+def save_model(model, model_name: str, period_name: str, output_dir: str = "results/model_outputs") -> None:
     """Saves a trained model to disk using joblib.
 
     Args:

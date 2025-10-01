@@ -1,0 +1,195 @@
+# =============================================================================
+# predictN2O - Default Configuration
+# =============================================================================
+# This file contains all configurable parameters for the N2O prediction pipeline
+# You can override these values via CLI arguments or create custom config files
+
+# =============================================================================
+# General Settings
+# =============================================================================
+general:
+  project_name: "predictN2O"
+  random_seed: 42
+  verbose: true
+  save_results: true
+  save_figures: true
+
+# =============================================================================
+# Data Configuration
+# =============================================================================
+data:
+  # Data paths
+  data_path: "data/AltenrheinWWTP.csv"
+  preprocessed_data_path: "data/AltenrheinWWTP_preprocessed.csv"
+  
+  # Data columns
+  time_column: "TIME"
+  target_column: "N2O"
+  feature_columns: ["DO", "T", "Q_in"]  # Core operational features
+  
+  # Data filtering
+  exclude_cols: ["TIME"]
+  include_cols: null  # If null, all numeric columns except exclude_cols
+  
+  # Train/test split
+  default_split_ratio: 0.8
+  min_samples_period: 50
+  min_test_samples: 10
+
+# =============================================================================
+# Time Periods Configuration
+# =============================================================================
+periods:
+  - name: "Januar–März"
+    start_date: "01-01"
+    end_date: "03-31"
+    description: "Winter period with stable conditions"
+    
+  - name: "März–Mitte Mai"
+    start_date: "03-01"
+    end_date: "05-15"
+    description: "Spring transition period"
+    
+  - name: "Mai–Oktober"
+    start_date: "05-15"
+    end_date: "10-31"
+    description: "Summer/autumn period with high variability"
+
+# =============================================================================
+# Models Configuration
+# =============================================================================
+models:
+  available_models: ["KNN", "RandomForest", "XGBoost", "AdaBoost", "DecisionTree", "DNN"]
+  default_model: "KNN"
+  
+  # Cross-validation settings
+  cv_folds: 5
+  cv_scoring: "r2"
+  cv_n_jobs: -1
+  cv_verbose: 2
+
+# =============================================================================
+# Feature Engineering Configuration
+# =============================================================================
+feature_engineering:
+  # Time-based features
+  time_features:
+    enabled: true
+    cyclic_hour: true
+    cyclic_day_of_year: true
+  
+  # Lag features (model and period specific)
+  lag_features:
+    enabled: true
+    default_lags:
+      DO: [1, 2]
+      Q_in: [1, 2]
+      T: [1, 2]
+  
+  # Rolling window features (model and period specific)
+  rolling_features:
+    enabled: true
+    default_windows:
+      DO: [3, 6, 12, 24]
+      Q_in: [3, 6, 12, 24]
+      T: [3, 6, 12, 24]
+    statistics: ["mean", "std"]
+
+# =============================================================================
+# Data Augmentation Configuration
+# =============================================================================
+augmentation:
+  enabled: false
+  n_augment: 0        # Number of augmented copies per original sample
+  noise_level: 0.00   # Noise level relative to std dev (e.g., 0.01 = 1%)
+
+# =============================================================================
+# Resampling Configuration
+# =============================================================================
+resampling:
+  # Default: no resampling (null)
+  # Available: "15T", "30T", "1H", "2H", etc.
+  default_rule: null
+  
+  # Model-specific overrides
+  model_overrides:
+    KNN:
+      "März–Mitte Mai": "30T"
+
+# =============================================================================
+# Output Configuration
+# =============================================================================
+output:
+  results_dir: "results"
+  model_output_dir: "results/model_outputs"
+  figures_dir: "results/figures"
+  logs_dir: "results/logs"
+  predictions_dir: "results/predictions"
+  
+  # File formats
+  model_format: "joblib"  # or "pickle"
+  results_format: "csv"   # or "parquet"
+
+# =============================================================================
+# Logging Configuration
+# =============================================================================
+logging:
+  level: "INFO"  # DEBUG, INFO, WARNING, ERROR
+  format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+  file_logging: true
+  console_logging: true
+  log_file: "results/logs/pipeline.log"
+
+# =============================================================================
+# Hyperparameter Grids (will be replaced by Optuna later)
+# =============================================================================
+hyperparameters:
+  XGBoost:
+    n_estimators: [1200]
+    learning_rate: [0.003]
+    max_depth: [6]
+    min_child_weight: [3]
+    subsample: [0.8]
+    colsample_bytree: [0.8]
+    
+  RandomForest:
+    n_estimators: [1000]
+    max_depth: [20]
+    min_samples_split: [10]
+    min_samples_leaf: [2]
+    
+  KNN:
+    n_neighbors: [5]
+    
+  AdaBoost:
+    n_estimators: [100]
+    learning_rate: [1.0]
+    
+  DecisionTree:
+    max_depth: [20]
+    min_samples_split: [10]
+    min_samples_leaf: [2]
+    
+  DNN:
+    hidden_layers: [64, 32]
+    dropout_rate: [0.2]
+    learning_rate: [0.001]
+    batch_size: [32]
+    epochs: [100]
+    early_stopping_patience: [10]
+
+# =============================================================================
+# Plugin Configuration
+# =============================================================================
+plugins:
+  feature_engineering:
+    enabled_plugins: ["time_features", "lag_features", "rolling_features"]
+    plugin_search_paths: ["src/plugins/feature_engineering"]
+    
+  data_preprocessing:
+    enabled_plugins: ["outlier_removal", "missing_value_handler"]
+    plugin_search_paths: ["src/plugins/preprocessing"]
+    
+  evaluation:
+    enabled_plugins: ["regression_metrics", "shap_analysis", "permutation_importance"]
+    plugin_search_paths: ["src/plugins/evaluation"]
